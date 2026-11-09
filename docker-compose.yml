@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: saas_dizimo_db
+    restart: always
+    environment:
+      POSTGRES_USER: saas_admin
+      POSTGRES_PASSWORD: saas_password
+      POSTGRES_DB: saas_dizimo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

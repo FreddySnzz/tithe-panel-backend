@@ -1,4 +1,14 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules", 
+    "test", 
+    "dist", 
+    "**/*spec.ts",
+    "prisma7.config.ts",
+    "prisma7.config.js",
+    "prisma7.config.d.ts",
+    "prisma7.config.js.map"
+  ]
 }
