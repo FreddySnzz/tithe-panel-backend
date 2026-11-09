@@ -2,6 +2,9 @@
 /dist
 /node_modules
 /build
+.agents
+.claude
+.windsurf
 
 # Logs
 logs
