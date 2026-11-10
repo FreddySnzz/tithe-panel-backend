@@ -53,40 +53,40 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    const newUser = await this.prisma.extended.user.create({
-      data: {
-        phone: data.phone,
-        password: hashedPassword,
-        parishId: data.parishId,
-        role: Role.TITHER, 
-        active: true,
-        tither: {
-          create: {
-            parishId: data.parishId,
-            name: data.name,
-            birthDate: new Date(data.birthDate), 
-            civilStatus: data.civilStatus,
-            phoneSecondary: data.phoneSecondary,
-            ministry: data.ministry,
-            spouseName: data.spouseName,
-            marriageDate: data.marriageDate ? new Date(data.marriageDate) : null,
-            community: data.community,
-            street: data.street,
-            neighborhood: data.neighborhood,
-            city: data.city,
-            state: data.state,
-          },
+    const newUser: any = await this.prisma.extended.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          phone: data.phone,
+          password: hashedPassword,
+          parishId: data.parishId,
+          role: Role.TITHER,
         },
-      },
-      include: {
-        tither: true,
-      },
+      });
+
+      await tx.tither.create({
+        data: {
+          userId: user.id,
+          parishId: data.parishId,
+          name: data.name,
+          birthDate: new Date(data.birthDate),
+          phoneSecondary: data.phoneSecondary,
+          civilStatus: data.civilStatus,
+          spouseName: data.spouseName,
+          marriageDate: data.marriageDate ? new Date(data.marriageDate) : null,
+          ministry: data.ministry,
+          community: data.community,
+          street: data.street,
+          neighborhood: data.neighborhood,
+          city: data.city,
+          state: data.state,
+        },
+      });
     });
 
     const payload = { sub: newUser.id, parishId: newUser.parishId, role: newUser.role };
     const access_token = await this.jwtService.signAsync(payload);
 
-   newUser.password = "";
+    newUser.password = "";
 
     return {
       message: 'Cadastro realizado com sucesso',

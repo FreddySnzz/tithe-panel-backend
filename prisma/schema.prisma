@@ -69,7 +69,7 @@ model Return {
   id             String         @id @default(uuid()) @db.Uuid
   userId         String         @map("user_id") @db.Uuid
   parishId       String         @map("parish_id") @db.Uuid
-  value          BigInt
+  value          Int            @map("value")
   referenceMonth Int            @map("reference_month")
   referenceYear  Int            @map("reference_year")
   status         ReturnStatus   @default(PENDING)

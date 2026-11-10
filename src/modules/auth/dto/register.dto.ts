@@ -1,10 +1,16 @@
 import { CivilStatus } from '@prisma/client';
 import { 
-  IsNotEmpty, IsString, IsOptional, IsEnum, IsUUID, Length, IsDateString 
+  IsNotEmpty, 
+  IsString, 
+  IsOptional, 
+  IsEnum, 
+  IsUUID, 
+  Length, 
+  IsDateString 
 } from 'class-validator';
 
 export class RegisterDto {
-  // --- (User)
+  // User =====
   @IsString()
   @IsNotEmpty({ message: 'O telefone de acesso é obrigatório' })
   phone!: string;
@@ -18,7 +24,7 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'A paróquia é obrigatória' })
   parishId!: string;
 
-  // --- (Tither)
+  // Tither =====
   @IsString()
   @IsNotEmpty({ message: 'O nome completo é obrigatório' })
   name!: string;
