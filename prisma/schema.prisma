@@ -11,7 +11,7 @@ model Parish {
   name                String   @db.VarChar(255)
   slug                String?  @unique @db.VarChar(255)
   phone               String   @db.VarChar(255)
-  document            String?  @db.VarChar(255)
+  document            String   @db.VarChar(255)
   priest              String?  @db.VarChar(255)
   themePrimaryColor   String?  @map("theme_primary_color") @db.VarChar(255)
   themeSecondaryColor String?  @map("theme_secondary_color") @db.VarChar(255)
@@ -20,14 +20,13 @@ model Parish {
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
   returns             Return[]
   tithers             Tither[]
-  users               User[]
 
   @@map("parishes")
 }
 
 model User {
   id        String   @id @default(uuid()) @db.Uuid
-  parishId  String?  @map("parish_id") @db.Uuid
+  name      String   @db.VarChar(255)
   phone     String   @unique @db.VarChar(255)
   password  String   @db.VarChar(255)
   role      Role     @default(TITHER)
@@ -36,7 +35,6 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
   returns   Return[]
   tither    Tither?
-  parish    Parish?  @relation(fields: [parishId], references: [id])
 
   @@map("users")
 }
@@ -45,7 +43,6 @@ model Tither {
   id             String      @id @default(uuid()) @db.Uuid
   userId         String      @unique @map("user_id") @db.Uuid
   parishId       String      @map("parish_id") @db.Uuid
-  name           String      @db.VarChar(255)
   phoneSecondary String?     @map("phone_secondary") @db.VarChar(255)
   birthDate      DateTime    @map("birth_date") @db.Date
   ministry       String?     @db.VarChar(255)

@@ -30,14 +30,13 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    const payload = { sub: user.id, parishId: user.parishId, role: user.role };
+    const payload = { sub: user.id, role: user.role };
     
     return {
       access_token: await this.jwtService.signAsync(payload),
       user: {
         id: user.id,
         role: user.role,
-        parishId: user.parishId,
       }
     };
   }
@@ -56,18 +55,17 @@ export class AuthService {
     const newUser: any = await this.prisma.extended.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
+          name: data.name,
           phone: data.phone,
           password: hashedPassword,
-          parishId: data.parishId,
           role: Role.TITHER,
         },
       });
 
-      await tx.tither.create({
+      const tither = await tx.tither.create({
         data: {
           userId: user.id,
           parishId: data.parishId,
-          name: data.name,
           birthDate: new Date(data.birthDate),
           phoneSecondary: data.phoneSecondary,
           civilStatus: data.civilStatus,
@@ -81,17 +79,25 @@ export class AuthService {
           state: data.state,
         },
       });
+
+      return { user, tither };
     });
 
-    const payload = { sub: newUser.id, parishId: newUser.parishId, role: newUser.role };
+    const payload = { 
+      sub: newUser.user.id, 
+      parishId: newUser.tither.parishId, 
+      role: newUser.user.role 
+    };
     const access_token = await this.jwtService.signAsync(payload);
-
-    newUser.password = "";
+    const { password, ...userWithoutPassword } = newUser.user;
 
     return {
       message: 'Cadastro realizado com sucesso',
       access_token,
-      user: newUser,
+      user: {
+        ...userWithoutPassword,
+        tither: newUser.tither
+      },
     };
   }
 }

@@ -3,9 +3,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { ParishModule } from './modules/parish/parish.module';
 import { TitherModule } from './modules/tither/tither.module';
 import { ReturnModule } from './modules/return/return.module';
+import { ParishesModule } from './modules/parish/parish.module';
 import { TenantMiddleware } from './common/tenant/tenant.middleware';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
@@ -14,7 +14,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     PrismaModule,
     AuthModule,
     UserModule,
-    ParishModule,
+    ParishesModule,
     TitherModule,
     ReturnModule,
   ],

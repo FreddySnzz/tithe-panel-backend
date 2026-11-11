@@ -12,6 +12,10 @@ import {
 export class RegisterDto {
   // User =====
   @IsString()
+  @IsNotEmpty({ message: 'O nome completo é obrigatório' })
+  name!: string;
+  
+  @IsString()
   @IsNotEmpty({ message: 'O telefone de acesso é obrigatório' })
   phone!: string;
 
@@ -20,14 +24,10 @@ export class RegisterDto {
   @Length(6, 100, { message: 'A senha deve ter pelo menos 6 caracteres' })
   password!: string;
 
+  // Tither =====
   @IsUUID(4, { message: 'O ID da paróquia deve ser um UUID válido' })
   @IsNotEmpty({ message: 'A paróquia é obrigatória' })
   parishId!: string;
-
-  // Tither =====
-  @IsString()
-  @IsNotEmpty({ message: 'O nome completo é obrigatório' })
-  name!: string;
 
   @IsDateString({}, { message: 'A data de nascimento deve ser uma data válida' })
   @IsNotEmpty({ message: 'A data de nascimento é obrigatória' })

@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ParishService } from './parish.service';
-import { ParishController } from './parish.controller';
+import { ParishesController } from './parish.controller';
+import { ParishesService } from './parish.service';
 
 @Module({
-  providers: [ParishService],
-  controllers: [ParishController]
+  controllers: [ParishesController],
+  providers: [ParishesService],
+  exports: [ParishesService],
 })
-export class ParishModule {}
+export class ParishesModule {}
