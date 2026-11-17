@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TitherService } from './tither.service';
 import { TitherController } from './tither.controller';
+import { TitherService } from './tither.service';
 
 @Module({
+  controllers: [TitherController],
   providers: [TitherService],
-  controllers: [TitherController]
+  exports: [TitherService],
 })
 export class TitherModule {}

@@ -42,19 +42,22 @@ export class ReturnsController {
   }
 
   @Get('report')
+  @Roles(Role.SUPER_ADMIN, Role.PARISH_ADMIN)
   async getReport(
+    @Req() req: any,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
     @Query('parishId') parishId?: string
   ): Promise<any> {
-    return this.returnsService.getParishReport(year, month, parishId);
+    return this.returnsService.getParishReport(year, month, req.user, parishId);
   }
 
   @Patch('update-status')
   @Roles(Role.SUPER_ADMIN, Role.PARISH_ADMIN)
   async updateReturnStatus(
+    @Req() req: any,
     @Body() dto: UpdateReturnDto
   ): Promise<any> {
-    return this.returnsService.updateReturnStatus(dto.status, dto.returnId);
+    return this.returnsService.updateReturnStatus(dto.status, dto.returnId, req.user);
   }
 }

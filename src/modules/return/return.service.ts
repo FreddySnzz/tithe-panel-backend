@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/common/prisma/prisma.service';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateReturnDto } from './dto/create-return.dto';
-import { ReturnStatus } from '@prisma/client';
+import { ReturnStatus, Role } from '@prisma/client';
 
 @Injectable()
 export class ReturnsService {
@@ -76,13 +76,25 @@ export class ReturnsService {
     };
   }
 
-  async updateReturnStatus(status: ReturnStatus, returnId: string) {
-    const existingPaid = await this.prisma.return.findFirst({
-      where: { id: returnId }
-    });
+  async updateReturnStatus(status: ReturnStatus, returnId: string, userInfo: any) {
+    let existingPaid;
+
+    if (userInfo.role === Role.PARISH_ADMIN) {
+      existingPaid = await this.prisma.extended.return.findFirst({
+        where: { id: returnId }
+      });
+    } else if (userInfo.role === Role.SUPER_ADMIN) {
+      existingPaid = await this.prisma.return.findFirst({
+        where: { id: returnId }
+      });
+    }
+
+    if (!existingPaid) {
+      throw new NotFoundException('Pagamento não encontrado.')
+    }
 
     if (existingPaid?.status === ReturnStatus.PAID) {
-      throw new BadRequestException('O pagamento já foi pago!');
+      throw new BadRequestException('A devolução para este mês já foi paga!');
     }
 
     return await this.prisma.return.update({
@@ -91,23 +103,41 @@ export class ReturnsService {
     });
   }
 
-  async getParishReport(year: number, month: number, parishId?: string) {
-    const whereClause: any = {};
-    if (parishId) whereClause.parishId = parishId;
+  async getParishReport(year: number, month: number, userInfo: any, parishId?: string) {
+    let tithers;
 
-    const tithers = await this.prisma.extended.tither.findMany({
-      where: whereClause,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            phone: true,
-            active: true,
+    if (userInfo.role === Role.PARISH_ADMIN) {
+      tithers = await this.prisma.extended.tither.findMany({
+        where: {},
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+              active: true,
+            },
           },
         },
-      },
-    });
+      });
+    } else if (userInfo.role === Role.SUPER_ADMIN) {
+      let whereClause: any = {};
+      if (parishId) whereClause.parishId = parishId;
+
+      tithers = await this.prisma.tither.findMany({
+        where: whereClause,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+              active: true,
+            },
+          },
+        },
+      });
+    }
 
     const returns = await this.prisma.extended.return.findMany({
       where: {
@@ -118,6 +148,8 @@ export class ReturnsService {
     });
 
     const paidUserIds = new Set(returns.map((r) => r.userId));
+
+    if (!tithers) throw new NotFoundException('Nenhum dizimista cadastrado.');
 
     const report = tithers.map((tither) => ({
       titherId: tither.id,
