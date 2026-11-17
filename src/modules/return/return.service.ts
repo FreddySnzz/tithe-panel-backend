@@ -39,6 +39,10 @@ export class ReturnsService {
   }
 
   async processReturn(userId: string, parishId: string, dto: CreateReturnDto) {
+    if (!parishId) {
+      throw new BadRequestException('O dizimista em questão não tem uma paróquia definida.');
+    }
+
     const existingPaid = await this.prisma.extended.return.findFirst({
       where: {
         userId,
@@ -72,7 +76,22 @@ export class ReturnsService {
     };
   }
 
-  async getParishReport(year: number, month: number, parishId?: number) {
+  async updateReturnStatus(status: ReturnStatus, returnId: string) {
+    const existingPaid = await this.prisma.return.findFirst({
+      where: { id: returnId }
+    });
+
+    if (existingPaid?.status === ReturnStatus.PAID) {
+      throw new BadRequestException('O pagamento já foi pago!');
+    }
+
+    return await this.prisma.return.update({
+      where: { id: returnId },
+      data: { status }
+    });
+  }
+
+  async getParishReport(year: number, month: number, parishId?: string) {
     const whereClause: any = {};
     if (parishId) whereClause.parishId = parishId;
 

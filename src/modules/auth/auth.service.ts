@@ -19,6 +19,13 @@ export class AuthService {
   async login(phone: string, pass: string) {
     const user = await this.prisma.extended.user.findUnique({
       where: { phone },
+      include: {
+        tither: {
+          select: {
+            parishId: true,
+          },
+        },
+      }
     });
     
     if (!user || !user.active) {
@@ -30,14 +37,20 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    const payload = { sub: user.id, role: user.role };
+    const payload = { 
+      sub: user.id, 
+      role: user.role, 
+      parishId: user.tither?.parishId
+    };
     
     return {
       access_token: await this.jwtService.signAsync(payload),
       user: {
         id: user.id,
+        name: user.name,
         role: user.role,
-      }
+      },
+      parishId: user.tither?.parishId
     };
   }
 
